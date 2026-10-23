@@ -1,0 +1,13 @@
+replicaCount: 1
+
+image:
+  repository: dispatch-api
+  tag: v1
+  pullPolicy: IfNotPresent
+
+service:
+  type: NodePort
+  port: 8000
+  targetPort: 8000
+
+containerPort: 8000
