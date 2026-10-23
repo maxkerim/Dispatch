@@ -18,6 +18,13 @@ uvicorn app.main:app --reload
 
 Set `DATABASE_URL` to use different PostgreSQL credentials or a remote database.
 
+Run the API and database tests with:
+
+```bash
+pip install -r requirements-dev.txt
+python -m pytest
+```
+
 `/health` checks that the API process is running. `/ready` also checks the
 PostgreSQL connection.
 
