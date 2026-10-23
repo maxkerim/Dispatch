@@ -11,3 +11,7 @@ service:
   targetPort: 8000
 
 containerPort: 8000
+
+database:
+  existingSecret: dispatch-db
+  secretKey: DATABASE_URL
