@@ -1,18 +1,39 @@
-from datetime import datetime, timezone
+from datetime import datetime
+from enum import Enum
 
-from sqlalchemy import DateTime, Integer, String
-from sqlalchemy.orm import Mapped, mapped_column
-
-from app.database import Base
+from pydantic import BaseModel, ConfigDict, Field, field_validator
 
 
-class Dispatch(Base):
-    __tablename__ = "dispatches"
+class DispatchStatus(str, Enum):
+    PENDING = "pending"
+    ASSIGNED = "assigned"
+    IN_TRANSIT = "in_transit"
+    DELIVERED = "delivered"
+    CANCELLED = "cancelled"
 
-    id: Mapped[int] = mapped_column(Integer, primary_key=True, index=True)
-    origin: Mapped[str] = mapped_column(String(500), nullable=False)
-    destination: Mapped[str] = mapped_column(String(500), nullable=False)
-    status: Mapped[str] = mapped_column(String(20), nullable=False, default="pending")
-    created_at: Mapped[datetime] = mapped_column(
-        DateTime(timezone=True), nullable=False, default=lambda: datetime.now(timezone.utc)
-    )
+
+class DispatchCreate(BaseModel):
+    origin: str = Field(min_length=1, max_length=500)
+    destination: str = Field(min_length=1, max_length=500)
+
+    @field_validator("origin", "destination")
+    @classmethod
+    def strip_address(cls, value: str) -> str:
+        value = value.strip()
+        if not value:
+            raise ValueError("Address must not be blank")
+        return value
+
+
+class DispatchStatusUpdate(BaseModel):
+    status: DispatchStatus
+
+
+class DispatchResponse(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    id: int
+    origin: str
+    destination: str
+    status: DispatchStatus
+    created_at: datetime
