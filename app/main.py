@@ -1,13 +1,22 @@
+from contextlib import asynccontextmanager
+
 from fastapi import Depends, FastAPI, HTTPException, status
 from prometheus_fastapi_instrumentator import Instrumentator
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.orm import Session
 
-from app.database import check_database, get_db
+from app.database import Base, check_database, engine, get_db
 from app.models import Dispatch
 from app.schemas import DispatchCreate, DispatchResponse, DispatchStatus, DispatchStatusUpdate
 
-app = FastAPI(title="Dispatch API")
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    Base.metadata.create_all(bind=engine)
+    yield
+
+
+app = FastAPI(title="Dispatch API", lifespan=lifespan)
 ALLOWED_STATUS_TRANSITIONS = {
     DispatchStatus.PENDING: {DispatchStatus.ASSIGNED, DispatchStatus.CANCELLED},
     DispatchStatus.ASSIGNED: {DispatchStatus.IN_TRANSIT, DispatchStatus.CANCELLED},

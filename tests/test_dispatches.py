@@ -9,13 +9,13 @@ from app.main import app
 
 
 @pytest.fixture
-def client():
+def client(monkeypatch):
     test_engine = create_engine(
         "sqlite://",
         connect_args={"check_same_thread": False},
         poolclass=StaticPool,
     )
-    Base.metadata.create_all(bind=test_engine)
+    monkeypatch.setattr("app.main.engine", test_engine)
     TestSessionLocal = sessionmaker(bind=test_engine, autoflush=False, autocommit=False)
 
     def override_get_db():
