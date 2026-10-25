@@ -1,4 +1,5 @@
 from fastapi import Depends, FastAPI, HTTPException, status
+from prometheus_fastapi_instrumentator import Instrumentator
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.orm import Session
 
@@ -71,3 +72,6 @@ def ready():
     except SQLAlchemyError as exc:
         raise HTTPException(status_code=503, detail="Database unavailable") from exc
     return {"status": "ready"}
+
+
+Instrumentator().instrument(app).expose(app, include_in_schema=False)

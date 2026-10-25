@@ -25,6 +25,17 @@ pip install -r requirements-dev.txt
 python -m pytest
 ```
 
+Run the local monitoring stack with:
+
+```bash
+docker compose up --build
+```
+
+Prometheus is available at `http://localhost:9090` and Grafana at
+`http://localhost:3000` (`admin` / `admin`, local development only). Grafana
+loads the Dispatch API dashboard automatically. The API metrics endpoint is
+`/metrics`.
+
 `/health` checks that the API process is running. `/ready` also checks the
 PostgreSQL connection.
 
@@ -39,3 +50,9 @@ kubectl create secret generic dispatch-db \
 
 Set `database.existingSecret` and `database.secretKey` in `values.yaml` to use a
 different Secret or key.
+
+GitHub Actions runs linting and tests on pushes to `main` and pull requests. It
+also builds the image, validates the Helm chart, deploys the API and PostgreSQL
+to a temporary `kind` cluster, and checks `/ready`. After a successful
+deployment on `main`, it publishes the image to GHCR with `sha-<commit>` and
+`latest` tags.
